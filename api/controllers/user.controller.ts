@@ -95,6 +95,8 @@ exports.login = async (req:any, res:any) => {
         res.status(402).json({msg: "Invalid data"});
         return;
     }
+  
+
     let { email, password } = req.body;
     let userFind = null;
     try{
@@ -134,5 +136,93 @@ exports.login = async (req:any, res:any) => {
 }
 
 
+exports.updateInfor = async (req:any, res:any) => {
+    if ( typeof req.body.name === 'undefined'
+        || typeof req.body.coverPicture === 'undefined'
+        || typeof req.body.desc === 'undefined'
+        || typeof req.body.address === 'undefined'
+        || typeof req.body.phone_number === 'undefined'
+        || typeof req.body.email === 'undefined'
+        || typeof req.body.gender === 'undefined'
+    ) {
+        res.status(422).json({ msg: 'Invalid data' });
+        return;
+    }
+    let { email, name, desc, coverPicture, address, phone_number,gender,} = req.body;
+    let userFind
+    try {
+        userFind = await user.findOne({'email': email})
+    }
+    catch(err) {
+        res.status(500).json({ msg: err });
+        return;
+    }
+    if(userFind === null) {
+        res.status(422).json({ msg: "not found" });
+        return;
+    }
+    userFind.name = name;
+    userFind.coverPicture = coverPicture;
+    userFind.address = address;
+    userFind.phone_number = phone_number
+    userFind.gender = gender
+    userFind.desc = desc;
+
+    try {
+        await userFind.save()
+    }
+    catch(err) {
+        res.status(500).json({ msg: err });
+        return;
+    }
+    let token = jwt.sign({email: email}, 'shhhhh');
+    res.status(200).json({msg: 'success', token: token, user: {
+        email: userFind.email,
+        name: userFind.name,
+        coverPicture: userFind.coverPicture,
+        desc: userFind.desc,
+        address: userFind.address,
+        phone_number: userFind.phone_number,
+        id: userFind._id,
+        gender: userFind.gender,
+    }});
+}
+
+exports.updatePassword = async (req:any, res:any) => {
+    if ( typeof req.body.oldpassword === 'undefined'
+        || typeof req.body.newpassword === 'undefined'
+        || typeof req.body.email === 'undefined'
+    ) {
+        res.status(422).json({ msg: 'Invalid data' });
+        return;
+    }
+    let { email, oldpassword, newpassword } = req.body;
+
+    let userFind = null;
+    try{
+        userFind = await user.findOne({'email': email});
+    }
+    catch(err){
+        res.json({msg: err});
+        return;
+    }
+    if(userFind == null){
+        res.status(422).json({msg: "Invalid data"});
+        return;
+    }
+    if(!bcrypt.compareSync(oldpassword, userFind.password)){
+        res.status(422).json({msg: 'Invalid data'});
+        return;
+    }
+    userFind.password = bcrypt.hashSync(newpassword, 10);
+    try {
+        await userFind.save()
+    }
+    catch(err) {
+        res.status(500).json({ msg: err });
+        return;
+    }
+    res.status(200).json({msg: 'success'});
+}
 
 

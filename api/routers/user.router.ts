@@ -11,14 +11,14 @@ module.exports = (app:any) => {
     app.route('/user/login')
     .post(user_controller.login);
 
-    app.route('/user/request/forgotpassword/:email')
-    .get(user_controller.requestForgotPassword)
+    // app.route('/user/request/forgotpassword/:email')
+    // .get(user_controller.requestForgotPassword)
 
-    app.route('/user/verify/forgotpassword')
-    .post(user_controller.verifyForgotPassword)
+    // app.route('/user/verify/forgotpassword')
+    // .post(user_controller.verifyForgotPassword)
 
-    app.route('/user/forgotpassword')
-    .post(user_controller.forgotPassword)
+    // app.route('/user/forgotpassword')
+    // .post(user_controller.forgotPassword)
 
     app.route('/user/updateinfor')
     .post(user_controller.updateInfor)

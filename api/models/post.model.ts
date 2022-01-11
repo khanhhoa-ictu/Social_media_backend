@@ -21,5 +21,7 @@ const post = new Schema({
         type: Array,
         default: [],
     },
-});
+},
+{ timestamps: true }
+);
 module.exports = mongoose.model('post', post);
