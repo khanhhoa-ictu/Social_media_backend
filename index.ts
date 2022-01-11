@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const userRouter = require('./api/routers/user.router');
+const postRouter = require('./api/routers/post.router');
 mongoose.Promise = global.Promise;
 
 const connect = async () => {
@@ -25,6 +26,7 @@ app.use(bodyParser.urlencoded({ limit: "50mb", extended: true, parameterLimit: 5
 app.use(cors())
 
 userRouter(app);
+postRouter(app);
 
 app.get('/', (req: Request, res: Response) => { res.send('welcome to Test') })
 
