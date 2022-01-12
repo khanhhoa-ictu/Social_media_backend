@@ -1,4 +1,5 @@
 const post = require('../models/post.model')
+const user = require('../models/user.model');
 import { initialValue, PostType } from "../../type/postType"
 
 exports.createPost =async (req : any, res :any) => {
@@ -175,4 +176,42 @@ exports.listPostProfile =async (req : any, res :any) => {
         return;
     }
     res.status(201).json({ msg: 'success', post : postFind })
+}
+
+exports.newsFeed =async (req : any, res :any) => {
+    let {userId} = req.params;
+    if(!userId){
+        res.status(402).json({msg: "Invalid data"});
+        return;
+    }
+    let userFind : any;
+    let listPost : any[]= [];
+    try{
+        userFind = await user.findOne({'_id': userId});
+    }
+    catch(err){
+        res.json({msg: err});
+        return;
+    }
+    if(userFind == null){
+        res.status(422).json({msg: "Invalid data"});
+        return;
+    }
+    userFind.followers.map((item : string) => {
+        (async () => {
+            let list = []
+            list = await post.find({'userId' : item})
+            listPost = [...listPost , ...list]
+            try {
+                await listPost
+            } catch (error) {
+                res.status(500).json({ msg: error });
+                return;
+            }
+        })()
+    })
+    setTimeout(() => {
+        res.status(201).json({ msg: 'success', list : listPost })
+    },1000)
+    
 }
