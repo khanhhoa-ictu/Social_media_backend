@@ -143,6 +143,109 @@ exports.login = async (req:any, res:any) => {
     }});
 }
 
+exports.requestForgotPassword = async (req:any, res:any) => {
+    if(typeof req.params.email === 'undefined'){
+        res.json({msg: "Invalid data"});
+        return;
+    }   
+    let email = req.params.email;
+    let userFind = null;
+    try{
+        userFind = await user.findOne({'email': email});
+    }
+    catch(err){
+        res.json({msg: err});
+        return;
+    }
+    if(userFind == null) {
+        res.status(422).json({msg: "Invalid data"});
+    }
+    if(!userFind.is_verify){
+        res.status(401).json({msg: 'no_registration_confirmation'});
+        return;
+    }
+    let token = otp.generateOTP();
+    let sendEmail = await nodemailer.sendEmailForgotPassword(email, token);
+    if (!sendEmail) {
+        res.status(500).json({ msg: 'Send email fail' });
+        return;
+    }   
+    userFind.token = token;
+    try {
+        await userFind.save();
+    }
+    catch (err) {
+        res.status(500).json({ msg: err });
+        return;
+    }
+    res.status(201).json({ msg: 'success', email: email })
+}
+
+exports.verifyForgotPassword = async (req:any, res:any) => {
+    if(typeof req.body.email === 'undefined'
+    || typeof req.body.otp === 'undefined'){
+        res.status(402).json({msg: "Invalid data"});
+        return;
+    }
+
+    let { email, otp } = req.body;
+    let userFind = null;
+    try{
+        userFind = await user.findOne({'email': email});
+    }
+    catch(err){
+        res.json({msg: err});
+        return;
+    }
+    
+    if(userFind == null){
+        res.status(422).json({msg: "Invalid data"});
+        return;
+    }
+    if(userFind.token != otp) {
+        res.status(422).json({msg: "OTP fail"});
+        return;
+    }
+    res.status(200).json({msg: "success", otp: otp});
+}
+
+exports.forgotPassword = async (req:any, res:any) => {
+    if(typeof req.body.email === 'undefined'
+    || typeof req.body.otp === 'undefined'
+    || typeof req.body.newPassword === 'undefined'){
+        res.status(402).json({msg: "Invalid data"});
+        return;
+    }
+    let { email, otp, newPassword } = req.body;
+    let userFind = null;
+    try{
+        userFind = await user.findOne({'email': email});
+    }
+    catch(err){
+        res.json({msg: err});
+        return;
+    }
+    if(userFind == null){
+        res.status(422).json({msg: "Invalid data"});
+        return;
+    }
+    if(userFind.token != otp) {
+        res.status(422).json({msg: "OTP fail"});
+        return;
+    }
+
+    userFind.password = bcrypt.hashSync(newPassword, 10);
+    try {
+        await userFind.save();
+    }
+    catch (err) {
+        console.log(err);
+        res.status(500).json({ msg: err });
+        return;
+    }
+    res.status(201).json({ msg: 'success' })
+}
+
 
 exports.updateInfor = async (req:any, res:any) => {
     if ( typeof req.body.name === 'undefined'
@@ -388,13 +491,24 @@ exports.getUser = async (req:any, res:any) => {
     const email = req.body.email;
     try {
       const User = await user.findOne({ 'email': email });
-      const { createdAt, is_verify,password,token,updatedAt,__v,_id,  ...other } = User._doc;
-      console.log(other);
+      const { createdAt, is_verify,password,token,updatedAt,__v,  ...other } = User._doc;
       res.status(200).json(other);
     } catch (err) {
       res.status(500).json(err);
     }
-  };
+};
+
+exports.getUserPost = async (req:any, res:any) => {
+    const {userId} = req.params;
+    try {
+      const User = await user.findOne({ '_id': userId });
+      const { createdAt, is_verify,password,token,updatedAt,__v,  ...other } = User._doc;
+      res.status(200).json(other);
+    } catch (err) {
+      res.status(500).json(err);
+    }
+};
+  
 
   const uploadImg = async (path:any) => {
     let res

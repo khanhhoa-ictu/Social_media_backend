@@ -8,7 +8,7 @@ module.exports = (app : any) => {
     .post(post_controller.updatePost);
     
     app.route('/post/delete/:idPost')
-    .delete(post_controller.deletePost);
+    .post(post_controller.deletePost);
     
     app.route('/post/like/:idPost')
     .post(post_controller.likePost);
@@ -18,4 +18,7 @@ module.exports = (app : any) => {
     
     app.route('/profile/:name')
     .get(post_controller.listPostProfile);
+
+    app.route('/newsFeed/:userId')
+    .get(post_controller.newsFeed)
 }

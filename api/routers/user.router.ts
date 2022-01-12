@@ -37,7 +37,7 @@ module.exports = (app:any) => {
 
     app.route('/user/updatepassword')
     .post(user_controller.updatePassword)
-
+    
     app.route('/user/delete')
     .post(user_controller.deleteUser)
 
@@ -50,6 +50,8 @@ module.exports = (app:any) => {
     app.route('/user/getuser')
     .post(user_controller.getUser)
 
+    app.route('/user/getUserPost/:userId')
+    .get(user_controller.getUserPost)
     app.route('/user/changeavatar')
     .post(upload.single('file'),user_controller.changeAvatar)
 }
