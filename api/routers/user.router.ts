@@ -1,6 +1,14 @@
 export {};
 const user_controller = require('../controllers/user.controller');
 const auth = require('../utils/auth');
+const multer = require('multer')
+const storage = multer.diskStorage({
+    destination: './files',
+    filename(req:any, file:any, cb:any) {
+        cb(null, `${Date.now()}-${file.originalname}`);
+      },
+  });
+  const upload = multer({ storage });
 
 module.exports = (app:any) => {
     app.route('/user/register')
@@ -44,4 +52,6 @@ module.exports = (app:any) => {
 
     app.route('/user/getUserPost/:userId')
     .get(user_controller.getUserPost)
+    app.route('/user/changeavatar')
+    .post(upload.single('file'),user_controller.changeAvatar)
 }

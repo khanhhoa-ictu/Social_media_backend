@@ -5,6 +5,14 @@ const randomstring = require('randomstring');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const otp = require('../utils/otp');
+var cloudinary = require('cloudinary').v2;
+var uploads = {};
+cloudinary.config({
+    cloud_name: 'ilike',
+    api_key: '678772438397898',
+    api_secret: 'zvdEWEfrF38a2dLOtVp-3BulMno'
+});
+
 import {initUser} from './../../type/userType'
 
 exports.register = async (req:any, res:any) => {
@@ -241,7 +249,6 @@ exports.forgotPassword = async (req:any, res:any) => {
 
 exports.updateInfor = async (req:any, res:any) => {
     if ( typeof req.body.name === 'undefined'
-        || typeof req.body.coverPicture === 'undefined'
         || typeof req.body.desc === 'undefined'
         || typeof req.body.address === 'undefined'
         || typeof req.body.phone_number === 'undefined'
@@ -251,7 +258,7 @@ exports.updateInfor = async (req:any, res:any) => {
         res.status(422).json({ msg: 'Invalid data' });
         return;
     }
-    let { email, name, desc, coverPicture, address, phone_number,gender,} = req.body;
+    let { email, name, desc, address, phone_number,gender,} = req.body;
     let userFind
     try {
         userFind = await user.findOne({'email': email})
@@ -265,7 +272,6 @@ exports.updateInfor = async (req:any, res:any) => {
         return;
     }
     userFind.name = name;
-    userFind.coverPicture = coverPicture;
     userFind.address = address;
     userFind.phone_number = phone_number
     userFind.gender = gender
@@ -502,3 +508,40 @@ exports.getUserPost = async (req:any, res:any) => {
       res.status(500).json(err);
     }
 };
+  
+
+  const uploadImg = async (path:any) => {
+    let res
+    try {
+        res = await cloudinary.uploader.upload(path)
+    }
+    catch(err) {
+        console.log(err)
+        return false
+    }
+    return res.secure_url
+}
+exports.changeAvatar = async (req:any, res:any) => {
+    let urlImg = null;
+
+    if(typeof req.file !== 'undefined' ) {
+        urlImg = await uploadImg(req.file.path)
+    }
+    if(urlImg !== null) {
+        if(urlImg === false) {
+            res.status(500).json({msg: 'server error'});
+            return;
+        }
+    }
+    const User = await user.findOne({ 'email': req.body.email });
+    User.coverPicture = urlImg;
+    try {
+        await User.save();
+        res.status(200).json({ msg: 'success', data: User });
+    }
+    catch (err) {
+        console.log(err);
+        res.status(500).json({ msg: err });
+        return;
+    }
+}
