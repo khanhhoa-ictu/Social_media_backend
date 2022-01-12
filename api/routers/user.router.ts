@@ -29,4 +29,17 @@ module.exports = (app:any) => {
 
     app.route('/user/updatepassword')
     .post(user_controller.updatePassword)
+    
+
+    app.route('/user/delete')
+    .post(user_controller.deleteUser)
+
+    app.route('/user/:name/follower')
+    .post(user_controller.followerUser)
+
+    app.route('/user/friendsuggestion/:userId')
+    .get(user_controller.getFriendSuggestion)
+
+    app.route('/user/getuser')
+    .post(user_controller.getUser)
 }

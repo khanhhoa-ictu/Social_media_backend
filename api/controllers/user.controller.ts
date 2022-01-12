@@ -327,3 +327,168 @@ exports.updatePassword = async (req:any, res:any) => {
     }
     res.status(200).json({msg: 'success'});
 }
+
+exports.deleteUser = async (req:any, res:any) => {
+    if (typeof req.body.email === 'undefined') {
+        res.status(422).json({ msg: 'Invalid data' });
+        return;
+    }
+    let userFind;
+    try {
+        userFind = await user.findOne({'email': req.body.email})
+    }
+    catch(err) {
+        res.status(500).json({ msg: err });
+        return;
+    }
+    userFind.remove();
+    res.status(200).json({ msg: 'success'});
+}
+exports.followerUser = async (req:any, res:any) => {
+    if (req.body.name !== req.params.name) {
+        try {
+          const userFollower = await user.findOne({'name': req.params.name});
+          const currentUser = await user.findOne({'name': req.body.name});
+          console.log(userFollower);
+          console.log(currentUser);
+          if (!userFollower.followers.includes(currentUser._id)) {
+            await userFollower.updateOne({ $push: { followers: currentUser._id } });
+            await currentUser.updateOne({ $push: { followings: userFollower._id} });
+            res.status(200).json("user has been followed");
+          } else {
+            res.status(403).json("you allready follow this user");
+          }
+        } catch (err) {
+          res.status(500).json(err);
+        }
+      } else {
+        res.status(403).json("you cant follow yourself");
+      }
+}
+
+exports.getFriendSuggestion = async (req:any, res:any)=>{
+    if (typeof  req.params.userId === 'undefined') {
+    res.status(422).json({ msg: 'Invalid data' });
+    return;
+}
+user.findOne({ _id: req.params.userId }, (err:any, docs:any) => {
+    if (err) {
+      res.status(500).json({ msg: err });
+      return;
+    }
+    res.status(200).json({ data: docs.followings });
+  });
+}
+exports.requestForgotPassword = async (req:any, res:any) => {
+    if(typeof req.params.email === 'undefined'){
+        res.json({msg: "Invalid data"});
+        return;
+    }   
+    let email = req.params.email;
+    let userFind = null;
+    try{
+        userFind = await user.findOne({'email': email});
+    }
+    catch(err){
+        res.json({msg: err});
+        return;
+    }
+    if(userFind == null) {
+        res.status(422).json({msg: "Invalid data"});
+    }
+    if(!userFind.is_verify){
+        res.status(401).json({msg: 'no_registration_confirmation'});
+        return;
+    }
+    let token = otp.generateOTP();
+    let sendEmail = await nodemailer.sendEmailForgotPassword(email, token);
+    if (!sendEmail) {
+        res.status(500).json({ msg: 'Send email fail' });
+        return;
+    }   
+    userFind.token = token;
+    try {
+        await userFind.save();
+    }
+    catch (err) {
+        res.status(500).json({ msg: err });
+        return;
+    }
+    res.status(201).json({ msg: 'success', email: email })
+}
+
+exports.verifyForgotPassword = async (req:any, res:any) => {
+    if(typeof req.body.email === 'undefined'
+    || typeof req.body.otp === 'undefined'){
+        res.status(402).json({msg: "Invalid data"});
+        return;
+    }
+
+    let { email, otp } = req.body;
+    let userFind = null;
+    try{
+        userFind = await user.findOne({'email': email});
+    }
+    catch(err){
+        res.json({msg: err});
+        return;
+    }
+    if(userFind == null){
+        res.status(422).json({msg: "Invalid data"});
+        return;
+    }
+    if(userFind.token != otp) {
+        res.status(422).json({msg: "OTP fail"});
+        return;
+    }
+    res.status(200).json({msg: "success", otp: otp});
+}
+
+exports.forgotPassword = async (req:any, res:any) => {
+    if(typeof req.body.email === 'undefined'
+    || typeof req.body.otp === 'undefined'
+    || typeof req.body.newPassword === 'undefined'){
+        res.status(402).json({msg: "Invalid data"});
+        return;
+    }
+    let { email, otp, newPassword } = req.body;
+    let userFind = null;
+    try{
+        userFind = await user.findOne({'email': email});
+    }
+    catch(err){
+        res.json({msg: err});
+        return;
+    }
+    if(userFind == null){
+        res.status(422).json({msg: "Invalid data"});
+        return;
+    }
+    if(userFind.token != otp) {
+        res.status(422).json({msg: "OTP fail"});
+        return;
+    }
+
+    userFind.password = bcrypt.hashSync(newPassword, 10);
+    try {
+        await userFind.save();
+    }
+    catch (err) {
+        console.log(err);
+        res.status(500).json({ msg: err });
+        return;
+    }
+    res.status(201).json({ msg: 'success' })
+}
+
+exports.getUser = async (req:any, res:any) => {
+    const email = req.body.email;
+    try {
+      const User = await user.findOne({ 'email': email });
+      const { createdAt, is_verify,password,token,updatedAt,__v,_id,  ...other } = User._doc;
+      console.log(other);
+      res.status(200).json(other);
+    } catch (err) {
+      res.status(500).json(err);
+    }
+  };
