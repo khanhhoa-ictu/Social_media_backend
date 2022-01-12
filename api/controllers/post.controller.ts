@@ -24,7 +24,7 @@ exports.createPost =async (req : any, res :any) => {
 }
 
 exports.updatePost =async (req : any, res :any) => {
-    let {idPost, desc, img} = req.body;
+    let {userId, idPost, desc, img} = req.body;
     if(!idPost || !desc || !img){
         res.status(402).json({msg: "Invalid data"});
         return;
@@ -40,6 +40,10 @@ exports.updatePost =async (req : any, res :any) => {
     if(postFind == null){
         res.status(422).json({msg: "Invalid data"});
         return;
+    }
+    if(postFind.userId !== userId) {
+        res.status(401).json({msg: "Authentication information"});
+        return; 
     }
     postFind.desc = desc
     postFind.img = img
@@ -186,6 +190,7 @@ exports.newsFeed =async (req : any, res :any) => {
     }
     let userFind : any;
     let listPost : any[]= [];
+    listPost = await post.find({'userId' : userId})
     try{
         userFind = await user.findOne({'_id': userId});
     }
