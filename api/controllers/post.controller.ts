@@ -1,10 +1,39 @@
 const post = require('../models/post.model')
 const user = require('../models/user.model');
 import { initialValue, PostType } from "../../type/postType"
+var cloudinary = require('cloudinary').v2;
+var uploads = {};
+cloudinary.config({
+    cloud_name: 'ilike',
+    api_key: '678772438397898',
+    api_secret: 'zvdEWEfrF38a2dLOtVp-3BulMno'
+});
+const uploadImg = async (path:any) => {
+    let res
+    try {
+        res = await cloudinary.uploader.upload(path)
+    }
+    catch(err) {
+        console.log(err)
+        return false
+    }
+    return res.secure_url
+}
 
 exports.createPost =async (req : any, res :any) => {
-    let {userId, desc, img} = req.body;
-    if(!userId || !desc || !img){
+    let urlImg = null;
+ let {userId, desc} = req.body;
+    if(typeof req.file !== 'undefined' ) {
+        urlImg = await uploadImg(req.file.path)
+    }
+    if(urlImg !== null) {
+        if(urlImg === false) {
+            res.status(500).json({msg: 'server error'});
+            return;
+        }
+    }
+   
+    if(!userId || !desc || !urlImg){
         res.status(402).json({msg: "Invalid data"});
         return;
     }
@@ -12,7 +41,7 @@ exports.createPost =async (req : any, res :any) => {
         ...initialValue,
         userId : userId,
         desc : desc,
-        img : img
+        img : urlImg
     })
     try {
         await newPost.save()

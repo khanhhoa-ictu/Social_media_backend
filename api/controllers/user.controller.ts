@@ -513,7 +513,7 @@ exports.getUserPost = async (req:any, res:any) => {
 };
   
 
-  const uploadImg = async (path:any) => {
+const uploadImg = async (path:any) => {
     let res
     try {
         res = await cloudinary.uploader.upload(path)
