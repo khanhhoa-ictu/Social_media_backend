@@ -27,3 +27,9 @@ export const initUser = {
     desc: '',
     gender:'',
 }
+
+export interface FriendType{
+    _id : string,
+    name:string,
+    profilePicture:string,
+}

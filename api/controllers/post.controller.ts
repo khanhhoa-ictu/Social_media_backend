@@ -183,40 +183,17 @@ exports.listPostProfile =async (req : any, res :any) => {
 }
 
 exports.newsFeed =async (req : any, res :any) => {
-    let {userId} = req.params;
-    if(!userId){
-        res.status(402).json({msg: "Invalid data"});
-        return;
-    }
-    let userFind : any;
-    let listPost : any[]= [];
-    listPost = await post.find({'userId' : userId})
-    try{
-        userFind = await user.findOne({'_id': userId});
-    }
-    catch(err){
-        res.json({msg: err});
-        return;
-    }
-    if(userFind == null){
-        res.status(422).json({msg: "Invalid data"});
-        return;
-    }
-    userFind.followers.map((item : string) => {
-        (async () => {
-            let list = []
-            list = await post.find({'userId' : item})
-            listPost = [...listPost , ...list]
-            try {
-                await listPost
-            } catch (error) {
-                res.status(500).json({ msg: error });
-                return;
-            }
-        })()
-    })
-    setTimeout(() => {
-        res.status(201).json({ msg: 'success', list : listPost })
-    },1000)
+    try {
+        const currentUser = await user.findById(req.params.userId);
+        const userPosts = await post.find({ userId: currentUser._id });
+        const friendPosts = await Promise.all(
+          currentUser.followings.map((friendId:any) => {
+            return post.find({ userId: friendId });
+          })
+        );
+        res.status(200).json(userPosts.concat(...friendPosts));
+      } catch (err) {
+        res.status(500).json(err);
+      }
     
 }

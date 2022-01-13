@@ -52,6 +52,7 @@ module.exports = (app:any) => {
 
     app.route('/user/getUserPost/:userId')
     .get(user_controller.getUserPost)
+    
     app.route('/user/changeavatar')
     .post(upload.single('file'),user_controller.changeAvatar)
 }
