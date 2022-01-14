@@ -37,8 +37,10 @@ exports.createPost =async (req : any, res :any) => {
         res.status(402).json({msg: "Invalid data"});
         return;
     }
+    let  userFind = await user.findById(userId);
     const newPost = new post({
         ...initialValue,
+        name: userFind.name,
         userId : userId,
         desc : desc,
         img : urlImg
@@ -122,6 +124,7 @@ exports.deletePost =async (req : any, res :any) => {
 exports.likePost =async (req : any, res :any) => {
     let {idPost} = req.params;
     let {userId} = req.body;
+
     if(!idPost || !userId){
         res.status(402).json({msg: "Invalid data"});
         return;
@@ -162,8 +165,15 @@ exports.detailPost =async (req : any, res :any) => {
         return;
     }
     let postFind = null;
+    let userPostDetail = null
     try{
         postFind = await post.findOne({'_id': idPost});
+        let userFind = await user.findOne({'_id': postFind.userId})
+        userPostDetail = {
+            name: userFind.name,
+            address: userFind.address,
+            profilePicture: userFind.profilePicture,
+        }
     }
     catch(err){
         res.json({msg: err});
@@ -180,7 +190,7 @@ exports.detailPost =async (req : any, res :any) => {
         res.status(500).json({ msg: error });
         return;
     }
-    res.status(201).json({ msg: 'success', post : postFind })
+    res.status(201).json({post : postFind, userPost: userPostDetail })
 }
 
 exports.listPostProfile =async (req : any, res :any) => {
@@ -226,3 +236,59 @@ exports.newsFeed =async (req : any, res :any) => {
       }
     
 }
+
+exports.mycomment = async (req:any, res:any) => {
+    if (
+      typeof req.body.userId === "undefined" ||
+      typeof req.body.id_post === "undefined" ||
+      typeof req.body.name === "undefined" ||
+      typeof req.body.comment === "undefined"
+    ) {
+      console.log('commnet: ')
+      res.status(422).json({ msg: "Invalid data" });
+      return;
+    }
+  
+    let { userId, id_post, name, comment,profilePicture } = req.body;
+    
+    let postFind;
+    try {
+        postFind = await post.findById(id_post);
+    } catch (err) {
+      res.status(422).json({ msg: " ID post Invalid data" });
+      return;
+    }
+    const new_comment ={
+      profilePicture:profilePicture,
+      userId: userId,
+      id_post: id_post,
+      name: name,
+      comment: comment
+    };
+    postFind.comments.push(new_comment);
+   
+    try {
+        postFind.save();
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({ msg: err });
+      return;
+    }
+    res.status(201).json({ msg: "success" });
+    return;
+  };
+  
+  exports.getCommentByIDPost = async (req:any, res:any) => {
+    if (
+      typeof req.body.id_post === "undefined"
+    ) {
+      res.status(422).json({ msg: "Invalid data" });
+      return;
+    }
+    let { id_post } = req.body;
+    let postFind = await post.findById(id_post);
+    let commentList = postFind.comments
+    res.status(200).json({ data: commentList });
+  
+  };
+  

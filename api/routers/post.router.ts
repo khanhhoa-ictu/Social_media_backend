@@ -22,7 +22,7 @@ module.exports = (app : any) => {
     app.route('/post/like/:idPost')
     .post(post_controller.likePost);
     
-    app.route('/post/detail/:idPost')
+    app.route('/post/:idPost')
     .get(post_controller.detailPost);
     
     app.route('/profile/:name')
@@ -30,4 +30,10 @@ module.exports = (app : any) => {
 
     app.route('/newsFeed/:userId')
     .get(post_controller.newsFeed)
+
+    app.route('/comment')
+    .post(post_controller.mycomment);
+    
+    app.route('/comment/post')
+    .post(post_controller.getCommentByIDPost)
 }
