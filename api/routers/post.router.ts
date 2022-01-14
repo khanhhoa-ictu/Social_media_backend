@@ -1,8 +1,17 @@
 export {};
 const post_controller = require('../controllers/post.controller');
+const multer = require('multer')
+const storage = multer.diskStorage({
+    destination: './files',
+    filename(req:any, file:any, cb:any) {
+        cb(null, `${Date.now()}-${file.originalname}`);
+      },
+  });
+  const upload = multer({ storage });
+
 module.exports = (app : any) => {
     app.route('/post/create')
-    .post(post_controller.createPost);
+    .post(upload.single('file'),post_controller.createPost);
 
     app.route('/post/update')
     .post(post_controller.updatePost);

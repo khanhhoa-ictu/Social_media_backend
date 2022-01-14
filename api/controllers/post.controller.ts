@@ -1,10 +1,39 @@
 const post = require('../models/post.model')
 const user = require('../models/user.model');
 import { initialValue, PostType } from "../../type/postType"
+var cloudinary = require('cloudinary').v2;
+var uploads = {};
+cloudinary.config({
+    cloud_name: 'ilike',
+    api_key: '678772438397898',
+    api_secret: 'zvdEWEfrF38a2dLOtVp-3BulMno'
+});
+const uploadImg = async (path:any) => {
+    let res
+    try {
+        res = await cloudinary.uploader.upload(path)
+    }
+    catch(err) {
+        console.log(err)
+        return false
+    }
+    return res.secure_url
+}
 
 exports.createPost =async (req : any, res :any) => {
-    let {userId, desc, img} = req.body;
-    if(!userId || !desc || !img){
+    let urlImg = null;
+ let {userId, desc} = req.body;
+    if(typeof req.file !== 'undefined' ) {
+        urlImg = await uploadImg(req.file.path)
+    }
+    if(urlImg !== null) {
+        if(urlImg === false) {
+            res.status(500).json({msg: 'server error'});
+            return;
+        }
+    }
+   
+    if(!userId || !desc || !urlImg){
         res.status(402).json({msg: "Invalid data"});
         return;
     }
@@ -12,7 +41,7 @@ exports.createPost =async (req : any, res :any) => {
         ...initialValue,
         userId : userId,
         desc : desc,
-        img : img
+        img : urlImg
     })
     try {
         await newPost.save()
@@ -183,40 +212,17 @@ exports.listPostProfile =async (req : any, res :any) => {
 }
 
 exports.newsFeed =async (req : any, res :any) => {
-    let {userId} = req.params;
-    if(!userId){
-        res.status(402).json({msg: "Invalid data"});
-        return;
-    }
-    let userFind : any;
-    let listPost : any[]= [];
-    listPost = await post.find({'userId' : userId})
-    try{
-        userFind = await user.findOne({'_id': userId});
-    }
-    catch(err){
-        res.json({msg: err});
-        return;
-    }
-    if(userFind == null){
-        res.status(422).json({msg: "Invalid data"});
-        return;
-    }
-    userFind.followers.map((item : string) => {
-        (async () => {
-            let list = []
-            list = await post.find({'userId' : item})
-            listPost = [...listPost , ...list]
-            try {
-                await listPost
-            } catch (error) {
-                res.status(500).json({ msg: error });
-                return;
-            }
-        })()
-    })
-    setTimeout(() => {
-        res.status(201).json({ msg: 'success', list : listPost })
-    },1000)
+    try {
+        const currentUser = await user.findById(req.params.userId);
+        const userPosts = await post.find({ userId: currentUser._id });
+        const friendPosts = await Promise.all(
+          currentUser.followings.map((friendId:any) => {
+            return post.find({ userId: friendId });
+          })
+        );
+        res.status(200).json(userPosts.concat(...friendPosts));
+      } catch (err) {
+        res.status(500).json(err);
+      }
     
 }

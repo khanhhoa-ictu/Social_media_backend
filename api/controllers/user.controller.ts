@@ -13,7 +13,7 @@ cloudinary.config({
     api_secret: 'zvdEWEfrF38a2dLOtVp-3BulMno'
 });
 
-import {initUser} from './../../type/userType'
+import {FriendType, initUser} from './../../type/userType'
 
 exports.register = async (req:any, res:any) => {
     if ((typeof req.body.email === 'undefined')
@@ -355,8 +355,6 @@ exports.followerUser = async (req:any, res:any) => {
         try {
           const userFollower = await user.findOne({'name': req.params.name});
           const currentUser = await user.findOne({'name': req.body.name});
-          console.log(userFollower);
-          console.log(currentUser);
           if (!userFollower.followers.includes(currentUser._id)) {
             await userFollower.updateOne({ $push: { followers: currentUser._id } });
             await currentUser.updateOne({ $push: { followings: userFollower._id} });
@@ -373,17 +371,22 @@ exports.followerUser = async (req:any, res:any) => {
 }
 
 exports.getFriendSuggestion = async (req:any, res:any)=>{
-    if (typeof  req.params.userId === 'undefined') {
-    res.status(422).json({ msg: 'Invalid data' });
-    return;
-}
-user.findOne({ _id: req.params.userId }, (err:any, docs:any) => {
-    if (err) {
-      res.status(500).json({ msg: err });
-      return;
-    }
-    res.status(200).json({ data: docs.followings });
-  });
+    try {
+        const userFind = await user.findById(req.params.userId);
+        const friends = await Promise.all(
+            userFind.followers.map((friendId:any) => {
+            return user.findById(friendId);
+          })
+        );
+        let friendList:FriendType[] = [];
+        friends.map((friend) => {
+          const { _id, name, profilePicture } = friend;
+          friendList.push({ _id, name, profilePicture });
+        });
+        res.status(200).json(friendList)
+      } catch (err) {
+        res.status(500).json(err);
+      }
 }
 exports.requestForgotPassword = async (req:any, res:any) => {
     if(typeof req.params.email === 'undefined'){
@@ -535,7 +538,7 @@ exports.changeAvatar = async (req:any, res:any) => {
         }
     }
     const User = await user.findOne({ 'email': req.body.email });
-    User.coverPicture = urlImg;
+    User.profilePicture = urlImg;
     try {
         await User.save();
         res.status(200).json({ msg: 'success', data: User });
