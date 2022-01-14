@@ -222,15 +222,30 @@ exports.listPostProfile =async (req : any, res :any) => {
 }
 
 exports.newsFeed =async (req : any, res :any) => {
+    let {userId,page,limit} = req.params
+    
     try {
-        const currentUser = await user.findById(req.params.userId);
-        const userPosts = await post.find({ userId: currentUser._id });
+        const currentUser = await user.findById(userId);
+        const userPosts = await post.find({ 'userId': currentUser._id });
         const friendPosts = await Promise.all(
           currentUser.followings.map((friendId:any) => {
-            return post.find({ userId: friendId });
+            return post.find({ 'userId': friendId });
           })
         );
-        res.status(200).json(userPosts.concat(...friendPosts));
+        let newFeed = userPosts.concat(...friendPosts);
+        newFeed.sort((a:any, b:any) =>{
+            return b.createdAt - a.createdAt;
+        })
+        
+        page = parseInt(req.params.page, 10);
+        limit = parseInt(req.params.limit, 10);
+         let skip = page * 10
+        let top = skip + limit
+        if (top > newFeed.length) {
+         top = skip + (newFeed.length - skip);
+        }
+        let pagedNewFeed = newFeed.slice(skip, top);
+        res.status(200).json(pagedNewFeed);
       } catch (err) {
         res.status(500).json(err);
       }

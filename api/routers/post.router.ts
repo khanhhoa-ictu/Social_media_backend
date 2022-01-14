@@ -28,7 +28,7 @@ module.exports = (app : any) => {
     app.route('/profile/:name')
     .get(post_controller.listPostProfile);
 
-    app.route('/newsFeed/:userId')
+    app.route('/newsFeed/:userId/:page/:limit')
     .get(post_controller.newsFeed)
 
     app.route('/comment')
