@@ -50,7 +50,7 @@ module.exports = (app:any) => {
     app.route('/user/getuser')
     .post(user_controller.getUser)
 
-    app.route('/user/getUserProfile/:name')
+    app.route('/user/getuserprofile/:id')
     .get(user_controller.getUserPost)
     
     app.route('/user/changeavatar')

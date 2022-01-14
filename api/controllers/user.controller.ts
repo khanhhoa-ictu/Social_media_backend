@@ -1,5 +1,6 @@
 
 const user = require('../models/user.model');
+const post = require('../models/post.model');
 const nodemailer = require('../utils/nodemailer');
 const randomstring = require('randomstring');
 const bcrypt = require('bcrypt');
@@ -502,11 +503,14 @@ exports.getUser = async (req:any, res:any) => {
 };
 
 exports.getUserPost = async (req:any, res:any) => {
-    const {name} = req.params;
+    const {id} = req.params;
+    console.log(id);
     try {
-      const User = await user.findOne({ 'name': name });
+      const User = await user.findById(id);
+      console.log(User);
+      let Post  = await post.find({'userId': User._id})
       const { createdAt, is_verify,password,token,updatedAt,__v,  ...other } = User._doc;
-      res.status(200).json(other);
+      res.status(200).json({user:other, post:Post});
     } catch (err) {
       res.status(500).json(err);
     }
