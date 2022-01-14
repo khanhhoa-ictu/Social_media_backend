@@ -13,7 +13,7 @@ cloudinary.config({
     api_secret: 'zvdEWEfrF38a2dLOtVp-3BulMno'
 });
 
-import {FriendType, initUser} from './../../type/userType'
+import {FriendType, initUser,UserType} from './../../type/userType'
 
 exports.register = async (req:any, res:any) => {
     if ((typeof req.body.email === 'undefined')
@@ -502,9 +502,9 @@ exports.getUser = async (req:any, res:any) => {
 };
 
 exports.getUserPost = async (req:any, res:any) => {
-    const {userId} = req.params;
+    const {name} = req.params;
     try {
-      const User = await user.findOne({ '_id': userId });
+      const User = await user.findOne({ 'name': name });
       const { createdAt, is_verify,password,token,updatedAt,__v,  ...other } = User._doc;
       res.status(200).json(other);
     } catch (err) {
@@ -547,4 +547,19 @@ exports.changeAvatar = async (req:any, res:any) => {
         res.status(500).json({ msg: err });
         return;
     }
+}
+
+exports.searchUser = async (req:any, res:any) => {
+    let {search} = req.params;
+    let userFind = null
+    try {
+        userFind = await user.find({'name': new RegExp(search, "i")})
+        let dataUser = userFind.filter((user:UserType) => {
+            return user.is_verify === true
+        })
+        res.status(200).json({ data: dataUser });
+    } catch (error) {
+        console.log(error);
+    }
+     
 }
