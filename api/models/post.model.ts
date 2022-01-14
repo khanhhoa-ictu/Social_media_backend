@@ -10,6 +10,9 @@ const post = new Schema({
         type: String,
         max: 500,
     },
+    name: {
+        type: String,
+    },
     img: {
         type: String,
     },
