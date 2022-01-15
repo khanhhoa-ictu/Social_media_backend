@@ -356,6 +356,7 @@ exports.followerUser = async (req:any, res:any) => {
         try {
           const userFollower = await user.findOne({'name': req.params.name});
           const currentUser = await user.findOne({'name': req.body.name});
+          console.log(userFollower);
           if (!userFollower.followers.includes(currentUser._id)) {
             await userFollower.updateOne({ $push: { followers: currentUser._id } });
             await currentUser.updateOne({ $push: { followings: userFollower._id} });
@@ -370,7 +371,25 @@ exports.followerUser = async (req:any, res:any) => {
         res.status(403).json("you cant follow yourself");
       }
 }
-
+exports.unFollowUser = async (req:any, res:any) => {
+    if (req.body.userId !== req.params.id) {
+        try {
+          const userFind = await user.findById(req.params.id);
+          const currentUser = await user.findById(req.body.userId);
+          if (userFind.followers.includes(req.body.userId)) {
+            await userFind.updateOne({ $pull: { followers: currentUser._id } });
+            await currentUser.updateOne({ $pull: { followings: userFind._id} });
+            res.status(200).json("user has been unfollowed");
+          } else {
+            res.status(403).json("you dont follow this user");
+          }
+        } catch (err) {
+          res.status(500).json(err);
+        }
+      } else {
+        res.status(403).json("you cant unfollow yourself");
+      }
+}
 exports.getFriendSuggestion = async (req:any, res:any)=>{
     try {
         const userFind = await user.findById(req.params.userId);

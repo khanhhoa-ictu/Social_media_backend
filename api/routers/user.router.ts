@@ -43,6 +43,9 @@ module.exports = (app:any) => {
 
     app.route('/user/:name/follower')
     .post(user_controller.followerUser)
+    
+    app.route('/user/:id/unfollower')
+    .put(user_controller.unFollowUser)
 
     app.route('/user/friendsuggestion/:userId')
     .get(user_controller.getFriendSuggestion)
