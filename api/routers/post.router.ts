@@ -14,7 +14,7 @@ module.exports = (app : any) => {
     .post(upload.single('file'),post_controller.createPost);
 
     app.route('/post/update')
-    .post(post_controller.updatePost);
+    .post(upload.single('file'),post_controller.updatePost);
     
     app.route('/post/delete/:idPost')
     .post(post_controller.deletePost);

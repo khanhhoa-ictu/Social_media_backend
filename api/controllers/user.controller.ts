@@ -336,13 +336,13 @@ exports.updatePassword = async (req:any, res:any) => {
 }
 
 exports.deleteUser = async (req:any, res:any) => {
-    if (typeof req.body.email === 'undefined') {
+    if (typeof req.params.id === 'undefined') {
         res.status(422).json({ msg: 'Invalid data' });
         return;
     }
     let userFind;
     try {
-        userFind = await user.findOne({'email': req.body.email})
+        userFind = await user.findById(req.params.id)
     }
     catch(err) {
         res.status(500).json({ msg: err });
@@ -504,10 +504,8 @@ exports.getUser = async (req:any, res:any) => {
 
 exports.getUserProfile = async (req:any, res:any) => {
     const {id} = req.params;
-    console.log(id);
     try {
       const User = await user.findById(id);
-      console.log(User);
       let Post  = await post.find({'userId': User._id})
       const { createdAt, is_verify,password,token,updatedAt,__v,  ...other } = User._doc;
       res.status(200).json({user:other, post:Post});

@@ -22,7 +22,8 @@ const uploadImg = async (path:any) => {
 
 exports.createPost =async (req : any, res :any) => {
     let urlImg = null;
- let {userId, desc} = req.body;
+    let {userId, desc} = req.body;
+    
     if(typeof req.file !== 'undefined' ) {
         urlImg = await uploadImg(req.file.path)
     }
@@ -55,14 +56,19 @@ exports.createPost =async (req : any, res :any) => {
 }
 
 exports.updatePost =async (req : any, res :any) => {
-    let {userId, idPost, desc, img} = req.body;
-    if(!idPost || !desc || !img){
+    let {userId, idPost, desc} = req.body;
+    let urlImg = null;
+    if(typeof req.file !== 'undefined' ) {
+        urlImg = await uploadImg(req.file.path)
+    }
+    if(!idPost || !desc || !urlImg){
         res.status(402).json({msg: "Invalid data"});
         return;
     }
     let postFind = null;
     try{
-        postFind = await post.findOne({'_id': idPost});
+        postFind = await post.findById(idPost);
+        // console.log(postFind);
     }
     catch(err){
         res.json({msg: err});
@@ -77,7 +83,7 @@ exports.updatePost =async (req : any, res :any) => {
         return; 
     }
     postFind.desc = desc
-    postFind.img = img
+    postFind.img = urlImg
     try {
         await postFind.save()
     } catch (error) {
@@ -170,6 +176,7 @@ exports.detailPost =async (req : any, res :any) => {
         postFind = await post.findOne({'_id': idPost});
         let userFind = await user.findOne({'_id': postFind.userId})
         userPostDetail = {
+            id: userFind._id,
             name: userFind.name,
             address: userFind.address,
             profilePicture: userFind.profilePicture,
@@ -259,7 +266,6 @@ exports.mycomment = async (req:any, res:any) => {
       typeof req.body.name === "undefined" ||
       typeof req.body.comment === "undefined"
     ) {
-      console.log('commnet: ')
       res.status(422).json({ msg: "Invalid data" });
       return;
     }
