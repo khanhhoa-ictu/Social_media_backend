@@ -276,9 +276,9 @@ exports.mycomment = async (req:any, res:any) => {
     }
     res.status(201).json({ msg: "success" });
     return;
-  };
+};
   
-  exports.getCommentByIDPost = async (req:any, res:any) => {
+exports.getCommentByIDPost = async (req:any, res:any) => {
     if (
       typeof req.body.id_post === "undefined"
     ) {
@@ -290,5 +290,5 @@ exports.mycomment = async (req:any, res:any) => {
     let commentList = postFind.comments
     res.status(200).json({ data: commentList });
   
-  };
+};
   
