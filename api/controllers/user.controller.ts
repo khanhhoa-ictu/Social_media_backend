@@ -502,7 +502,7 @@ exports.getUser = async (req:any, res:any) => {
     }
 };
 
-exports.getUserPost = async (req:any, res:any) => {
+exports.getUserProfile = async (req:any, res:any) => {
     const {id} = req.params;
     console.log(id);
     try {
@@ -567,3 +567,14 @@ exports.searchUser = async (req:any, res:any) => {
     }
      
 }
+
+exports.getUserPost = async (req:any, res:any) => {
+    const {userId} = req.params;
+    try {
+      const User = await user.findOne({ '_id': userId });
+      const { createdAt, is_verify,password,token,updatedAt,__v,  ...other } = User._doc;
+      res.status(200).json(other);
+    } catch (err) {
+      res.status(500).json(err);
+    }
+};

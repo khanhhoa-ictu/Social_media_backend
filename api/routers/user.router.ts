@@ -51,12 +51,16 @@ module.exports = (app:any) => {
     .post(user_controller.getUser)
 
     app.route('/user/getuserprofile/:id')
-    .get(user_controller.getUserPost)
+    .get(user_controller.getUserProfile)
     
     app.route('/user/changeavatar')
     .post(upload.single('file'),user_controller.changeAvatar)
 
     app.route('/user/:search')
     .get(user_controller.searchUser)
+
+    app.route('/user/getuserpost/:userId')
+    .get(user_controller.getUserPost)
+    
       
 }
