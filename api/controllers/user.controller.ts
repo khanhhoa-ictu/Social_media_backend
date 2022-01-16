@@ -1,5 +1,6 @@
 
 const user = require('../models/user.model');
+import { Request, Response } from 'express';
 const post = require('../models/post.model');
 const nodemailer = require('../utils/nodemailer');
 const randomstring = require('randomstring');
@@ -16,7 +17,7 @@ cloudinary.config({
 
 import {FriendType, initUser,UserType} from './../../type/userType'
 
-exports.register = async (req:any, res:any) => {
+exports.register = async (req:Request, res:Response) => {
     if ((typeof req.body.email === 'undefined')
         || (typeof req.body.password === 'undefined')
         || (typeof req.body.name === 'undefined')
@@ -69,7 +70,7 @@ exports.register = async (req:any, res:any) => {
     res.status(201).json({ msg: 'success' })
 }
 
-exports.verifyAccount = async (req:any, res:any) => {
+exports.verifyAccount = async (req:Request, res:Response) => {
     if(typeof req.params.token === 'undefined'){
         res.status(402).json({msg: "!invalid"});
         return;
@@ -98,7 +99,7 @@ exports.verifyAccount = async (req:any, res:any) => {
     res.status(200).json({msg:"success!"});
 }
 
-exports.login = async (req:any, res:any) => {
+exports.login = async (req:Request, res:Response) => {
     if(typeof req.body.email === 'undefined'
     || typeof req.body.password == 'undefined'){
         res.status(402).json({msg: "Invalid data"});
@@ -144,7 +145,7 @@ exports.login = async (req:any, res:any) => {
     }});
 }
 
-exports.requestForgotPassword = async (req:any, res:any) => {
+exports.requestForgotPassword = async (req:Request, res:Response) => {
     if(typeof req.params.email === 'undefined'){
         res.json({msg: "Invalid data"});
         return;
@@ -182,7 +183,7 @@ exports.requestForgotPassword = async (req:any, res:any) => {
     res.status(201).json({ msg: 'success', email: email })
 }
 
-exports.verifyForgotPassword = async (req:any, res:any) => {
+exports.verifyForgotPassword = async (req:Request, res:Response) => {
     if(typeof req.body.email === 'undefined'
     || typeof req.body.otp === 'undefined'){
         res.status(402).json({msg: "Invalid data"});
@@ -210,7 +211,7 @@ exports.verifyForgotPassword = async (req:any, res:any) => {
     res.status(200).json({msg: "success", otp: otp});
 }
 
-exports.forgotPassword = async (req:any, res:any) => {
+exports.forgotPassword = async (req:Request, res:Response) => {
     if(typeof req.body.email === 'undefined'
     || typeof req.body.otp === 'undefined'
     || typeof req.body.newPassword === 'undefined'){
@@ -248,7 +249,7 @@ exports.forgotPassword = async (req:any, res:any) => {
 }
 
 
-exports.updateInfor = async (req:any, res:any) => {
+exports.updateInfor = async (req:Request, res:Response) => {
     if ( typeof req.body.name === 'undefined'
         || typeof req.body.desc === 'undefined'
         || typeof req.body.address === 'undefined'
@@ -298,7 +299,7 @@ exports.updateInfor = async (req:any, res:any) => {
     }});
 }
 
-exports.updatePassword = async (req:any, res:any) => {
+exports.updatePassword = async (req:Request, res:Response) => {
     if ( typeof req.body.oldpassword === 'undefined'
         || typeof req.body.newpassword === 'undefined'
         || typeof req.body.email === 'undefined'
@@ -335,7 +336,7 @@ exports.updatePassword = async (req:any, res:any) => {
     res.status(200).json({msg: 'success'});
 }
 
-exports.deleteUser = async (req:any, res:any) => {
+exports.deleteUser = async (req:Request, res:Response) => {
     if (typeof req.params.id === 'undefined') {
         res.status(422).json({ msg: 'Invalid data' });
         return;
@@ -351,7 +352,7 @@ exports.deleteUser = async (req:any, res:any) => {
     userFind.remove();
     res.status(200).json({ msg: 'success'});
 }
-exports.followerUser = async (req:any, res:any) => {
+exports.followerUser = async (req:Request, res:Response) => {
     if (req.body.name !== req.params.name) {
         try {
           const userFollower = await user.findOne({'name': req.params.name});
@@ -371,7 +372,7 @@ exports.followerUser = async (req:any, res:any) => {
         res.status(403).json("you cant follow yourself");
       }
 }
-exports.unFollowUser = async (req:any, res:any) => {
+exports.unFollowUser = async (req:Request, res:Response) => {
     if (req.body.userId !== req.params.id) {
         try {
           const userFind = await user.findById(req.params.id);
@@ -390,7 +391,7 @@ exports.unFollowUser = async (req:any, res:any) => {
         res.status(403).json("you cant unfollow yourself");
       }
 }
-exports.getFriendSuggestion = async (req:any, res:any)=>{
+exports.getFriendSuggestion = async (req:Request, res:Response)=>{
     try {
         const userFind = await user.findById(req.params.userId);
         const friends = await Promise.all(
@@ -408,7 +409,7 @@ exports.getFriendSuggestion = async (req:any, res:any)=>{
         res.status(500).json(err);
       }
 }
-exports.requestForgotPassword = async (req:any, res:any) => {
+exports.requestForgotPassword = async (req:Request, res:Response) => {
     if(typeof req.params.email === 'undefined'){
         res.json({msg: "Invalid data"});
         return;
@@ -446,7 +447,7 @@ exports.requestForgotPassword = async (req:any, res:any) => {
     res.status(201).json({ msg: 'success', email: email })
 }
 
-exports.verifyForgotPassword = async (req:any, res:any) => {
+exports.verifyForgotPassword = async (req:Request, res:Response) => {
     if(typeof req.body.email === 'undefined'
     || typeof req.body.otp === 'undefined'){
         res.status(402).json({msg: "Invalid data"});
@@ -473,7 +474,7 @@ exports.verifyForgotPassword = async (req:any, res:any) => {
     res.status(200).json({msg: "success", otp: otp});
 }
 
-exports.forgotPassword = async (req:any, res:any) => {
+exports.forgotPassword = async (req:Request, res:Response) => {
     if(typeof req.body.email === 'undefined'
     || typeof req.body.otp === 'undefined'
     || typeof req.body.newPassword === 'undefined'){
@@ -510,7 +511,7 @@ exports.forgotPassword = async (req:any, res:any) => {
     res.status(201).json({ msg: 'success' })
 }
 
-exports.getUser = async (req:any, res:any) => {
+exports.getUser = async (req:Request, res:Response) => {
     const email = req.body.email;
     try {
       const User = await user.findOne({ 'email': email });
@@ -520,8 +521,19 @@ exports.getUser = async (req:any, res:any) => {
       res.status(500).json(err);
     }
 };
+exports.getUserID = async (req:Request, res:Response) => {
+    const id = req.params.id;
+    try {
+      const User = await user.findById(id);
+      console.log(User);
+      const { createdAt, is_verify,password,token,updatedAt,__v,  ...other } = User._doc;
+      res.status(200).json(other);
+    } catch (err) {
+      res.status(500).json(err);
+    }
+};
 
-exports.getUserProfile = async (req:any, res:any) => {
+exports.getUserProfile = async (req:Request, res:Response) => {
     const {id} = req.params;
     try {
       const User = await user.findById(id);
@@ -570,7 +582,7 @@ exports.changeAvatar = async (req:any, res:any) => {
     }
 }
 
-exports.searchUser = async (req:any, res:any) => {
+exports.searchUser = async (req:Request, res:Response) => {
     let {search} = req.params;
     let userFind = null
     try {
@@ -585,7 +597,7 @@ exports.searchUser = async (req:any, res:any) => {
      
 }
 
-exports.getUserPost = async (req:any, res:any) => {
+exports.getUserPost = async (req:Request, res:Response) => {
     const {userId} = req.params;
     try {
       const User = await user.findOne({ '_id': userId });

@@ -7,6 +7,8 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const userRouter = require('./api/routers/user.router');
 const postRouter = require('./api/routers/post.router');
+const conversationRouter = require('./api/routers/converstation.router')
+const messageRouter = require('./api/routers/messages.router')
 mongoose.Promise = global.Promise;
 
 const connect = async () => {
@@ -27,7 +29,8 @@ app.use(cors())
 
 userRouter(app);
 postRouter(app);
-
+conversationRouter(app)
+messageRouter(app)
 app.get('/', (req: Request, res: Response) => { res.send('welcome to Test') })
 
 app.listen(port, () => console.log("server running on port " + port));

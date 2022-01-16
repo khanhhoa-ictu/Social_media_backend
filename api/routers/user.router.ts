@@ -53,6 +53,9 @@ module.exports = (app:any) => {
     app.route('/user/getuser')
     .post(user_controller.getUser)
 
+    app.route('/user/getuser/:id')
+    .get(user_controller.getUserID)
+
     app.route('/user/getuserprofile/:id')
     .get(user_controller.getUserProfile)
     
