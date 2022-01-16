@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 
 const Conversation = require("../models/conversation.model");
 
-exports.createConversation = async (req : any, res :any) => {
+exports.createConversation = async (req : Request, res :Response) => {
     const newConversation = new Conversation({
         members: [req.body.senderId, req.body.receiverId],
       });

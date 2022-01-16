@@ -1,5 +1,6 @@
 const post = require('../models/post.model')
 const user = require('../models/user.model');
+import { Request, Response } from 'express';
 import { initialValue, PostType } from "../../type/postType"
 var cloudinary = require('cloudinary').v2;
 var uploads = {};
@@ -8,7 +9,7 @@ cloudinary.config({
     api_key: '678772438397898',
     api_secret: 'zvdEWEfrF38a2dLOtVp-3BulMno'
 });
-const uploadImg = async (path:any) => {
+const uploadImg = async (path:string) => {
     let res
     try {
         res = await cloudinary.uploader.upload(path)
@@ -23,7 +24,7 @@ const uploadImg = async (path:any) => {
 exports.createPost =async (req : any, res :any) => {
     let urlImg = null;
     let {userId, desc} = req.body;
-    
+    console.log(typeof req.file);
     if(typeof req.file !== 'undefined' ) {
         urlImg = await uploadImg(req.file.path)
     }
@@ -68,7 +69,6 @@ exports.updatePost =async (req : any, res :any) => {
     let postFind = null;
     try{
         postFind = await post.findById(idPost);
-        // console.log(postFind);
     }
     catch(err){
         res.json({msg: err});
@@ -93,7 +93,7 @@ exports.updatePost =async (req : any, res :any) => {
     res.status(201).json({ msg: 'success', post : postFind })
 }
 
-exports.deletePost =async (req : any, res :any) => {
+exports.deletePost =async (req : Request, res :Response) => {
     let {idPost} = req.params;
     let {userId} = req.body;
     if(!idPost || !userId){
@@ -127,7 +127,7 @@ exports.deletePost =async (req : any, res :any) => {
     res.status(201).json({ msg: 'success', post : postFind })
 }
 
-exports.likePost =async (req : any, res :any) => {
+exports.likePost =async (req : Request, res :Response) => {
     let {idPost} = req.params;
     let {userId} = req.body;
 
@@ -164,7 +164,7 @@ exports.likePost =async (req : any, res :any) => {
     res.status(201).json({ msg: 'success', post : postFind })
 }
 
-exports.detailPost =async (req : any, res :any) => {
+exports.detailPost =async (req : Request, res :Response) => {
     let {idPost} = req.params;
     if(!idPost){
         res.status(402).json({msg: "Invalid data"});
@@ -200,7 +200,7 @@ exports.detailPost =async (req : any, res :any) => {
     res.status(201).json({post : postFind, userPost: userPostDetail })
 }
 
-exports.listPostProfile =async (req : any, res :any) => {
+exports.listPostProfile =async (req : Request, res :Response) => {
     let {userId} = req.body;
     if(!userId){
         res.status(402).json({msg: "Invalid data"});
@@ -228,14 +228,15 @@ exports.listPostProfile =async (req : any, res :any) => {
     res.status(201).json({ msg: 'success', post : postFind })
 }
 
-exports.newsFeed =async (req : any, res :any) => {
-    let {userId,page,limit} = req.params
-    
+exports.newsFeed =async (req : Request, res :Response) => {
+    let {userId} = req.params
+    let page = parseInt(req.params.page, 10);
+    let limit = parseInt(req.params.limit, 10);
     try {
         const currentUser = await user.findById(userId);
         const userPosts = await post.find({ 'userId': currentUser._id });
         const friendPosts = await Promise.all(
-          currentUser.followings.map((friendId:any) => {
+          currentUser.followings.map((friendId:string) => {
             return post.find({ 'userId': friendId });
           })
         );
@@ -244,9 +245,7 @@ exports.newsFeed =async (req : any, res :any) => {
             return b.createdAt - a.createdAt;
         })
         
-        page = parseInt(req.params.page, 10);
-        limit = parseInt(req.params.limit, 10);
-         let skip = page * 10
+        let skip = page * 10
         let top = skip + limit
         if (top > newFeed.length) {
          top = skip + (newFeed.length - skip);
@@ -259,7 +258,7 @@ exports.newsFeed =async (req : any, res :any) => {
     
 }
 
-exports.mycomment = async (req:any, res:any) => {
+exports.mycomment = async (req : Request, res :Response) => {
     if (
       typeof req.body.userId === "undefined" ||
       typeof req.body.id_post === "undefined" ||
@@ -299,7 +298,7 @@ exports.mycomment = async (req:any, res:any) => {
     return;
   };
   
-  exports.getCommentByIDPost = async (req:any, res:any) => {
+  exports.getCommentByIDPost = async (req : Request, res :Response) => {
     if (
       typeof req.body.id_post === "undefined"
     ) {
