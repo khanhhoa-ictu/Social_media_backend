@@ -607,3 +607,41 @@ exports.getUserPost = async (req:Request, res:Response) => {
       res.status(500).json(err);
     }
 };
+
+exports.getFollower = async (req:Request, res:Response) => {
+    try {
+        const userFind = await user.findById(req.params.userId);
+        const friends = await Promise.all(
+            userFind.followers.map((friendId:any) => {
+            return user.findById(friendId);
+          })
+        );
+        let friendList:FriendType[] = [];
+        friends.map((friend) => {
+          const { _id, name, profilePicture } = friend;
+          friendList.push({ _id, name, profilePicture });
+        });
+        res.status(200).json(friendList)
+      } catch (err) {
+        res.status(500).json(err);
+      }
+};
+exports.getFollowing = async (req:Request, res:Response) => {
+    try {
+        const userFind = await user.findById(req.params.userId);
+        const friends = await Promise.all(
+            userFind.followings.map((friendId:any) => {
+            return user.findById(friendId);
+          })
+        );
+        let friendList:FriendType[] = [];
+        friends.map((friend) => {
+          const { _id, name, profilePicture } = friend;
+          friendList.push({ _id, name, profilePicture });
+        });
+        res.status(200).json(friendList)
+      } catch (err) {
+        res.status(500).json(err);
+      }
+};
+
