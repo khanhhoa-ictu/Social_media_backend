@@ -41,7 +41,7 @@ module.exports = (app:any) => {
     app.route('/user/delete/:id')
     .get(user_controller.deleteUser)
 
-    app.route('/user/:name/follower')
+    app.route('/user/:id/follower')
     .post(user_controller.followerUser)
     
     app.route('/user/:id/unfollower')

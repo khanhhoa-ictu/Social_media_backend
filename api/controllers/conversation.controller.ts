@@ -16,11 +16,11 @@ exports.createConversation = async (req : Request, res :Response) => {
 }
 
 exports.getConversationUser = async (req:Request, res:Response) => {
-  console.log(req.params.id);
   try {
     const conversation = await Conversation.find({
       members: { $in: [req.params.id] },
     });
+    console.log('aaaaaaaaaaaaaaaaaaaa',conversation);
     res.status(200).json(conversation);
   } catch (err) {
     res.status(500).json(err);

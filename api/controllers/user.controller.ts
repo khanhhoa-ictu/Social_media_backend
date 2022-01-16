@@ -2,6 +2,7 @@
 const user = require('../models/user.model');
 import { Request, Response } from 'express';
 const post = require('../models/post.model');
+const Conversation = require("./../models/conversation.model");
 const nodemailer = require('../utils/nodemailer');
 const randomstring = require('randomstring');
 const bcrypt = require('bcrypt');
@@ -353,15 +354,18 @@ exports.deleteUser = async (req:Request, res:Response) => {
     res.status(200).json({ msg: 'success'});
 }
 exports.followerUser = async (req:Request, res:Response) => {
-    if (req.body.name !== req.params.name) {
+    if (req.body.id !== req.params.id) {
         try {
-          const userFollower = await user.findOne({'name': req.params.name});
-          const currentUser = await user.findOne({'name': req.body.name});
-          console.log(userFollower);
+          const userFollower = await user.findById(req.params.id);
+          const currentUser = await user.findById(req.body.id);
+          const newConversation = new Conversation({
+            members: [req.params.id, req.body.id],
+          });
+          let a = await newConversation.save();
           if (!userFollower.followers.includes(currentUser._id)) {
             await userFollower.updateOne({ $push: { followers: currentUser._id } });
             await currentUser.updateOne({ $push: { followings: userFollower._id} });
-            res.status(200).json("user has been followed");
+            res.status(200).json(a);
           } else {
             res.status(403).json("you allready follow this user");
           }
