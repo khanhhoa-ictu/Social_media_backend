@@ -24,7 +24,7 @@ exports.sendEmail = async (email:string, token:string) => {
             + ' <br/>'
             + '<span>Please verify your account by clicking the link</span>'
             + '<br/>'
-            + '<span>http://localhost:3000/confirm/' + token +  '</span>'
+            + '<span>https://khanhhoa-ictu.github.io/Social_Media/confirm/' + token +  '</span>'
     };
     try{
         let send = await transporter.sendMail(mailOptions);
