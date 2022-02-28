@@ -10,7 +10,7 @@ const postRouter = require('./api/routers/post.router');
 const conversationRouter = require('./api/routers/converstation.router')
 const messageRouter = require('./api/routers/messages.router')
 mongoose.Promise = global.Promise;
-const URL = 'mongodb+srv://admin:aGsnda87yYPgKEbr@cluster0.io9hj.mongodb.net/myFirstDatabase?retryWrites=true&w=majority'
+const URL = 'mongodb://localhost/margatsni_db'
  mongoose.connect(URL, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
