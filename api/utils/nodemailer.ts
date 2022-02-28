@@ -6,7 +6,11 @@ const transporter = nodemailer.createTransport(
      auth: {
        user: 'khanhhoatest@gmail.com',
        pass: 'sax5101997'
-     }
+     },
+     tls: {
+        // do not fail on invalid certs
+        rejectUnauthorized: false
+    }
     }
  )
 
