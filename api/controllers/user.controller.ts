@@ -11,7 +11,7 @@ const otp = require('../utils/otp');
 var cloudinary = require('cloudinary').v2;
 var uploads = {};
 cloudinary.config({
-    cloud_name: 'ilike',
+    cloud_name: 'smile159',
     api_key: '678772438397898',
     api_secret: 'zvdEWEfrF38a2dLOtVp-3BulMno'
 });
